@@ -1,0 +1,430 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+	<title>ODAGIS+ Web / Mobil- Table of Contents</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Professional Edition 4.1.0.219">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/silver-theme/jquery-ui-1.8.12.custom.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/dynatree/chm/ui.dynatree.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+    <link type="text/css" rel="stylesheet" media="all" href="css/toc.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#tabs .ui-widget-header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.8.17.custom.min.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/jquery.dynatree.min.js"></script>
+	<script type="text/javascript" src="js/hndjsse.js"></script>
+	<script type="text/javascript">
+	
+		window.bSearchDataLoaded = false;
+		var sHelpIdToActivate = '';
+	
+		$(document).ready(function()
+		{
+			var sAnchorName = '';
+			try { sAnchorName = top.location.href.substring(top.location.href.lastIndexOf("#") + 1, top.location.href.length); }
+			catch(err) { sAnchorName = ''; }
+			var nSelectedTab = 0;
+			if (sAnchorName == '_index') nSelectedTab = 1
+			else if (sAnchorName == '_search') nSelectedTab = 2;			
+			$("#tabs").tabs({
+				selected: nSelectedTab,
+				select: function(event, ui) { HideKwPopup(); }
+			});
+			
+			// Toc
+			if ($("#tab-toc").length) {
+				$("#tab-toc").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onActivate: function(node){
+						if ($("#tab-keywords").length && $("#tab-keywords").dynatree && $("#tab-keywords").dynatree("getTree") && $("#tab-keywords").dynatree("getTree").activateKey)
+							$("#tab-keywords").dynatree("getTree").activateKey(null);
+						if(node.data.href && node.data.href != '#'){
+							window.open(node.data.href, node.data.target);
+						}
+					}
+				});
+				// Expand all nodes if required
+				$("#tab-toc").dynatree("getRoot").visit(function(node){
+						node.expand(true);
+					});
+				// Select the active help id
+				if (sHelpIdToActivate != '') $("#tab-toc").dynatree("getTree").activateKey(sHelpIdToActivate);
+			}
+			
+			// Keywords
+			
+			if ($("#tab-keywords").length) {
+				$("#tab-keywords").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onClick: function(node, event){
+						HideKwPopup();
+						if (node.data && node.data.click)
+						{
+							var aRefList = null;
+							eval('aRefList=' + node.data.click);
+							if (ShowKwPopup(node.li, aRefList))
+							{
+								if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").activateKey)
+									$("#tab-toc").dynatree("getTree").activateKey(null);
+								if(node.data.href && node.data.href != '#'){
+									window.open(node.data.href, node.data.target);
+								}
+							}
+						}
+					}
+				});
+				// Expand all nodes if required
+				$("#tab-keywords").dynatree("getRoot").visit(function(node){
+						node.expand(true);
+					});
+				}
+			
+			// Load search data
+			(function() {
+				var se = document.createElement('script'); se.type = 'text/javascript'; se.async = true;
+				se.src = 'js/hndsd.js';
+				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(se, s);
+			})();
+		});
+		
+		$('body').click(function() {
+			HideKwPopup();
+		});
+		
+		function SelectTocItem(sHelpId)
+		{
+			if ($("#tab-toc").length && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").getNodeByKey) {
+				$("#tab-toc").dynatree("getTree").getNodeByKey(sHelpId).activateSilently();
+			}
+			else {
+				sHelpIdToActivate = sHelpId;
+			}
+		}
+		
+		function HideKwPopup()
+		{
+			if($("#popupMenu")) $("#popupMenu").remove();
+		}
+		
+		function ShowKwPopup(oSender, aLinks)
+		{
+			HideKwPopup();
+			if (!aLinks || !aLinks.length || aLinks.length == 0) return false
+			else if (aLinks.length == 1) return true
+			else
+			{
+				var oParentDiv = document.createElement("DIV");
+				oParentDiv.id = "popupMenu";
+				var oLink = null;
+				// Close button
+				oLink = document.createElement("SPAN");
+				oLink.className = "close-button";
+				oLink.innerHTML = "X";
+				oLink.href = "#";
+				oLink.onclick = HideKwPopup;
+				oParentDiv.appendChild(oLink);
+				// Items
+				for (var nCnt=0; nCnt<aLinks.length; nCnt++)
+				{
+					oLink = document.createElement("A");
+					oLink.innerHTML = aLinks[nCnt][0];
+					oLink.href = aLinks[nCnt][1];
+					oLink.target = "FrameMain";
+					oLink.onclick = HideKwPopup;
+					oParentDiv.appendChild(oLink);
+				}
+				document.body.appendChild(oParentDiv);
+				var pos = $(oSender).offset(); 
+				var height = $(oSender).height();
+				$(oParentDiv).css({
+					"left": (pos.left+20) + "px",
+					"top": (pos.top + height + 5) + "px"
+				});
+				$(oParentDiv).show();
+				return false;
+			}
+		}
+		
+		function PerformSearch()
+		{
+			if (!window.bSearchDataLoaded) {
+				$("#search_results").html("Search engine data hasn't been fully loaded yet or an error occurred while loading it. This usually happens when documentation is browsed locally.");
+				return;
+			}
+			sValue = $("#search_value").val();
+			$("#search_results").html('Searching...');
+			var oSearchEngine = new HndJsSe;
+			oSearchEngine.ParseInput(sValue);			
+			oSearchEngine.PerformSearch();
+			if (!oSearchEngine.aResults || !oSearchEngine.aResults.length)
+			{
+				$("#search_results").html('No results found.');
+			}
+			else
+			{
+				$("#search_results").html('<div id="search_results_content"></div>');
+				var oUl = $("#search_results_content").append("<ul id='lr'></ul>").find("ul");
+				for (var nCnt = 0; nCnt < oSearchEngine.aResults.length; nCnt++)
+				{
+					if (oSearchEngine.aResults[nCnt][0] < aTl.length)
+					{
+						oUl.append("<li><a href='" + aTl[oSearchEngine.aResults[nCnt][0]][0] + "?search=" + escape(sValue) + "' target='FrameMain'>" + unescape(aTl[oSearchEngine.aResults[nCnt][0]][1]) + "</a></li>");
+					}
+				}
+				// Tree
+				$("#search_results_content").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onActivate: function(node){
+						if ($("#search_results_content") && $("#search_results_content").dynatree && $("#search_results_content").dynatree("getTree") && $("#search_results_content").dynatree("getTree").activateKey)
+							$("#search_results_content").dynatree("getTree").activateKey(null);
+						if(node.data.href && node.data.href != '#'){
+							window.open(node.data.href, node.data.target);
+						}
+					}
+				});
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="tabs">
+		<ul>
+			<li><a href="#tab-toc">Contents</a></li>
+			<li><a href="#tab-keywords">Index</a></li>
+			<li><a href="#tab-search">Search</a></li>
+			</ul>
+		<div id="tab-toc">
+			<ul id="toc" class="">
+
+				<li class="folder" id="Giris" data="">
+							<a
+							href="Giris.html"
+							target="FrameMain">
+								Giriş</a>
+
+				<ul><li class="" id="Hogeldiniz" data="icon: '10.png'">
+							<a
+							href="Hogeldiniz.html"
+							target="FrameMain">
+								Hoşgeldiniz</a>
+
+				</li><li class="" id="SistemGereksinimleri" data="icon: '10.png'">
+							<a
+							href="SistemGereksinimleri.html"
+							target="FrameMain">
+								Sistem Gereksinimleri</a>
+
+				</li><li class="" id="ODAGISHakkinda" data="icon: '11.png'">
+							<a
+							href="ODAGISHakkinda.html"
+							target="FrameMain">
+								ODAGIS+ Hakkında</a>
+
+				</li></ul></li><li class="folder" id="ODAGISWebArayuzu" data="">
+							<a
+							href="ODAGISWebArayuzu.html"
+							target="FrameMain">
+								ODAGIS+ Web Aray&uuml;z&uuml;</a>
+
+				<ul><li class="" id="SistemeGirisCikisIslemleri" data="">
+							<a
+							href="SistemeGirisCikisIslemleri.html"
+							target="FrameMain">
+								Sisteme Giriş / &Ccedil;ıkış İşlemleri</a>
+
+				</li><li class="" id="GenelGorunum" data="">
+							<a
+							href="GenelGorunum.html"
+							target="FrameMain">
+								Genel G&ouml;r&uuml;n&uuml;m</a>
+
+				</li><li class="" id="KullaniciveGorunumAyarlari" data="">
+							<a
+							href="KullaniciveGorunumAyarlari.html"
+							target="FrameMain">
+								Kullanıcı ve G&ouml;r&uuml;n&uuml;m Ayarları</a>
+
+				</li><li class="folder" id="SorguArayuzu" data="">
+							<a
+							href="SorguArayuzu.html"
+							target="FrameMain">
+								Sorgu Aray&uuml;z&uuml;</a>
+
+				<ul><li class="" id="HazirSorgu" data="">
+							<a
+							href="HazirSorgu.html"
+							target="FrameMain">
+								Hazır Sorgu</a>
+
+				</li><li class="" id="SecmeliSorgu" data="">
+							<a
+							href="SecmeliSorgu.html"
+							target="FrameMain">
+								Se&ccedil;meli Sorgu</a>
+
+				</li><li class="" id="DinamikDetayliSorgu" data="">
+							<a
+							href="DinamikDetayliSorgu.html"
+							target="FrameMain">
+								Dinamik/Detaylı Sorgu</a>
+
+				</li><li class="" id="HizliAraKoordinataGit" data="">
+							<a
+							href="HizliAraKoordinataGit.html"
+							target="FrameMain">
+								Hızlı Ara/Koordinata Git</a>
+
+				</li></ul></li><li class="folder" id="HaritaArayuzu" data="">
+							<a
+							href="HaritaArayuzu.html"
+							target="FrameMain">
+								Harita Aray&uuml;z&uuml;</a>
+
+				<ul><li class="" id="CBSHaritalari" data="">
+							<a
+							href="CBSHaritalari.html"
+							target="FrameMain">
+								CBS Haritaları</a>
+
+				</li><li class="" id="AltlikHaritalar" data="">
+							<a
+							href="AltlikHaritalar.html"
+							target="FrameMain">
+								Altlık Haritalar</a>
+
+				</li><li class="" id="Genel" data="">
+							<a
+							href="Genel.html"
+							target="FrameMain">
+								Genel</a>
+
+				</li></ul></li><li class="folder" id="AnalizArayuzu" data="icon: '0.png'">
+							<a
+							href="AnalizArayuzu.html"
+							target="FrameMain">
+								Analiz Aray&uuml;z&uuml;</a>
+
+				<ul><li class="folder" id="CBSAnalizleri" data="">
+							<a
+							href="CBSAnalizleri.html"
+							target="FrameMain">
+								CBS Analizleri</a>
+
+				<ul><li class="" id="IzlemeAnalizleri" data="">
+							<a
+							href="IzlemeAnalizleri.html"
+							target="FrameMain">
+								İzleme Analizleri</a>
+
+				</li><li class="" id="TamponBolgeAnalizleri" data="">
+							<a
+							href="TamponBolgeAnalizleri.html"
+							target="FrameMain">
+								Tampon B&ouml;lge Analizleri</a>
+
+				</li></ul></li><li class="" id="YolTarifi" data="">
+							<a
+							href="YolTarifi.html"
+							target="FrameMain">
+								Yol Tarifi</a>
+
+				</li></ul></li><li class="folder" id="EditorArayuzu" data="">
+							<a
+							href="EditorArayuzu.html"
+							target="FrameMain">
+								Edit&ouml;r Aray&uuml;z&uuml;</a>
+
+				<ul><li class="" id="Ekle" data="">
+							<a
+							href="Ekle.html"
+							target="FrameMain">
+								Ekle</a>
+
+				</li><li class="" id="Sil" data="">
+							<a
+							href="Sil.html"
+							target="FrameMain">
+								Sil</a>
+
+				</li><li class="" id="Guncelle" data="">
+							<a
+							href="Guncelle.html"
+							target="FrameMain">
+								G&uuml;ncelle</a>
+
+				</li></ul></li><li class="folder" id="RaporArayuzu" data="icon: '1.png'">
+							<a
+							href="RaporArayuzu.html"
+							target="FrameMain">
+								Rapor Aray&uuml;z&uuml;</a>
+
+				<ul><li class="" id="GenelKullanim" data="">
+							<a
+							href="GenelKullanim.html"
+							target="FrameMain">
+								Genel Kullanım</a>
+
+				</li><li class="" id="DuzenlemeveAyarlar" data="">
+							<a
+							href="DuzenlemeveAyarlar.html"
+							target="FrameMain">
+								D&uuml;zenleme ve Ayarlar</a>
+
+				</li></ul></li></ul></li><li class="" id="ODAGISMobilArayuzu" data="">
+							<a
+							href="ODAGISMobilArayuzu.html"
+							target="FrameMain">
+								ODAGIS+ Mobil Aray&uuml;z&uuml;</a>
+
+				</li></ul>
+		</div>
+		
+		<div id="tab-keywords">
+			<ul id="keywords">
+
+				<li class="file" data="click:'[[\'Genel G&ouml;r&uuml;n&uuml;m\',\'GenelGorunum.html\']]'">
+							<a
+								href="GenelGorunum.html"
+								target="FrameMain"
+								onClick="[['Genel G&ouml;r&uuml;n&uuml;m','GenelGorunum.html']]"
+								>
+								</a>
+
+				</li></ul>
+		</div>
+		
+		<div id="tab-search">
+			<form onsubmit="PerformSearch(); return false;">
+				<label for="search_value">Search:</label>
+				<input id="search_value" name="search_value"></input>
+				<input type="submit" value="Search"/>
+			</form>
+			<div id="search_results"></div>
+		</div>
+		
+		</div>
+    
+</body>
+
+</html>
+
